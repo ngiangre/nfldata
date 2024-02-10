@@ -25,7 +25,7 @@ nflreadr::dictionary_rosters
 data_dir <- arrow::open_dataset("data/weekly_rosters")
 data_dir |>
     filter(season==2023L,
-           week==1L,
+           week==19L,
            team=="BUF") |>
     collect() |>
     pivot_wider(
@@ -37,7 +37,7 @@ data_dir |>
 # combine -----------------------------------------------------------------
 
 nflreadr::dictionary_combine
-data_dir <- arrow::open_dataset("data/combine")
+rqdata_dir <- arrow::open_dataset("data/combine")
 data_dir |>
     filter(season==2023L,grepl("Buf",draft_team)) |>
     collect()
@@ -69,3 +69,35 @@ data_dir |>
         play_action = stringr::str_remove(play_action,"_[0-9]$")
     ) |>
     drop_na()
+
+# nextgen_stats -----------------------------------------------------------------
+
+nflreadr::dictionary_nextgen_stats
+data_dir <- arrow::open_dataset("data/nextgen_stats/ngs_receiving.parquet")
+data_dir |>
+    filter(season==2023L & week==1) |>
+    collect() |> View()
+
+# snap_counts -----------------------------------------------------------------
+
+nflreadr::dictionary_snap_counts
+data_dir <- arrow::open_dataset("data/snap_counts")
+data_dir |>
+    filter(season==2023L & team=="BUF" & week==19) |>
+    collect()
+
+# pbp_participation -----------------------------------------------------------------
+
+nflreadr::dictionary_participation
+data_dir <- arrow::open_dataset("data/pbp_participation")
+data_dir |>
+    filter(season==2023L,possession_team=="BUF") |>
+    collect()
+
+generate_dictionary <- function(dat){
+    dat |>
+        mutate(rowid=1:n()) |>
+        pivot_longer(
+            cols = -rowid
+        )
+}
